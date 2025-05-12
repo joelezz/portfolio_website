@@ -5,7 +5,7 @@ import Home from './pages/Home';
 import Work from './pages/Work';
 import Contact from "./pages/Contact";
 import NoPage from "./pages/NoPage";
-
+import ThreeBackground  from './components/ThreeBackground';
 
 function App() {
 
@@ -19,6 +19,7 @@ function App() {
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>
+      <ThreeBackground />
     </>
   )
 }
