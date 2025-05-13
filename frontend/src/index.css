@@ -20,6 +20,13 @@ p {
   color:aliceblue;
   font-size: xx-large;
   margin-bottom: auto;
+  letter-spacing: 5px;
+  line-height: 1.8;
+
+}
+
+.main-textarea{
+  margin: 20px 0;
 }
 
 @keyframes color-change {
@@ -152,13 +159,13 @@ label {
 
 input{
   width:100%;
-  border: 1px dotted rgb(135, 139, 255);
+  border: none;
 }
 
 textarea {
   width: 100%;
   min-height: 50px;
-  border: 1px dotted rgb(135, 139, 255);
+  border: none;
 
 }
 
