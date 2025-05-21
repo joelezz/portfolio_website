@@ -8,3 +8,4 @@ Flask-WTF>=1.0
 WTForms>=3.0
 Werkzeug>=2.0
 python-dotenv # For managing environment variables (recommended)
+gunicorn==22.0.0
