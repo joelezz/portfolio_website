@@ -9,7 +9,7 @@ const FormComponent = () => {
   });
 
   useEffect(() => {
-    fetch("http://localhost:5000/form_data", {
+    fetch("https://portfolio-website-backend-749y.onrender.com/form_data", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -43,7 +43,7 @@ const FormComponent = () => {
     console.log("Form submitted:", data);
 
     // You can send the form data to Flask here
-    fetch("http://localhost:5000/form_submit", {
+    fetch("https://portfolio-website-backend-749y.onrender.com/form_submit", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

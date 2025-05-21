@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
         console.log("AuthContext: login function called for username:", username);
 
         try {
-            const response = await fetch('http://localhost:5000/api/admin/login', { // Ensure this path is correct
+            const response = await fetch('https://portfolio-website-backend-749y.onrender.com/api/admin/login', { // Ensure this path is correct
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
