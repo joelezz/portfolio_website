@@ -63,7 +63,7 @@ const authToken = localStorage.getItem('authToken');
     formData.append('image', selectedFile); // Key should match backend: image
 
     try {
-      const response = await fetch("http://localhost:5000/api/admin/projects", { // Corrected Endpoint
+      const response = await fetch("https://portfolio-website-backend-749y.onrender.com/api/admin/projects", { // Corrected Endpoint
         method: "POST",
         headers: {
           // DO NOT set 'Content-Type': 'multipart/form-data' manually.
