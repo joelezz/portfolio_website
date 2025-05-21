@@ -1,0 +1,57 @@
+/* src/components/MobileMenu.css */
+.mobile-menu {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Or flex-start if you want items at top */
+  align-items: center; /* Center links horizontally */
+  background-color: rgb(2, 0, 60); /* Your dark background color */
+  position: fixed; /* Or absolute if parent is relative and full screen */
+  top: 0;
+  right: -100%; /* Start off-screen to the right */
+  width: 70%; /* Or your desired width, e.g., 250px */
+  max-width: 300px;
+  height: 100vh;
+  padding: 2rem;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+  transition: right 0.3s ease-in-out;
+  z-index: 1000; /* Below burger icon overlay, above page content */
+  overflow-y: auto;
+}
+
+.mobile-menu.open {
+  right: 0; /* Slide in from the right */
+}
+
+.mobile-menu a,
+.mobile-menu .user-greeting,
+.mobile-menu .logout-button {
+  font-size: 1.5rem;
+  padding: 1rem 0;
+  font-weight: bold;
+  letter-spacing: 0.1rem;
+  color: antiquewhite; /* Your light text color */
+  text-decoration: none;
+  text-align: center;
+  width: 100%;
+}
+
+.mobile-menu a:hover,
+.mobile-menu .logout-button:hover {
+  color: rgb(149, 156, 255); /* Your accent color */
+}
+
+.mobile-menu .active-link {
+    color: rgb(149, 156, 255); /* Your accent color for active link */
+    font-weight: bolder;
+}
+
+.mobile-menu .user-greeting {
+    font-size: 1rem;
+    color: #ccc; /* Subtler color */
+}
+
+.mobile-menu .logout-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}

@@ -1,30 +1,120 @@
-# dependencies
-/node_modules
+# Python / Flask Backend
+# ------------------------------------
+# Virtual environments
+env/
+venv/
+ENV/
+*.venv/
+.env/ # If you have a folder named .env
 
-# production
-/build
-
-# misc
-.DS_Store
+# Secrets files (ensure these are never committed)
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+*.env.local
+config.json # If you store secrets here and don't use .env
 
-# testing
-/coverage
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
 
-# IDEs and editors
-.vscode/
+# Instance folder (Flask specific, often for local DBs or secrets)
+/instance/
+*.sqlite
+*.sqlite3
+
+# Database files (if using local SQLite for dev, not for production data)
+# *.db
+
+# Uploaded files (user-generated content, should not be in repo)
+# If your Flask UPLOAD_FOLDER is 'backend/static/uploads/'
+backend/static/uploads/
+# Or more generally, if it's just 'static/uploads' relative to backend root
+# static/uploads/
+
+# IDE / Editor specific
 .idea/
+.vscode/
 *.sublime-workspace
-*.sublime-project
+*.swp
 
-# logs
+# Logs
+*.log
+logs/
+
+# Coverage reports
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Flask-specific
+# .webassets-cache # If using Flask-Assets
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# React Frontend
+# ------------------------------------
+# Node modules
+frontend/node_modules/
+node_modules/ # If frontend is at root or in another dir
+
+# Build output
+frontend/build/
+frontend/dist/
+build/ # If frontend is at root
+dist/  # If frontend is at root
+
+# More log files
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/logs/
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# OS files
-Thumbs.db
+# Local .env files for frontend
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+.env.local # If frontend is at root
+
+# Editor directories and files
+# .vscode/*
+# !.vscode/settings.json  # Example: if you want to commit some non-sensitive settings
+# !.vscode/extensions.json
+# .idea
+# *.suo
+# *.ntvs*
+# *.njsproj
+# *.sln
+# *.sw?
+
+# Optional: Test coverage
+frontend/coverage/
+coverage/

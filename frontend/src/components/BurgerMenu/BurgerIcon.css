@@ -1,0 +1,46 @@
+/* src/components/BurgerIcon.css */
+.burger-icon {
+  width: 2rem;  /* 32px */
+  height: 2rem; /* 32px */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: -20px;
+  z-index: 1050; /* Ensure it's above the menu and other content */
+  position: fixed; /* Or fixed, depending on navbar */
+  
+}
+
+.burger-icon:focus {
+  outline: 2px solid var(--accent-purple); /* Your focus color */
+  outline-offset: 2px;
+}
+
+.burger-bar {
+  width: 2rem;
+  height: 0.25rem; /* 4px */
+  background-color: white; /* Adjust to your theme's icon color */
+  border-radius: 10px;
+  transition: all 0.3s linear;
+  position: relative;
+  transform-origin: 1px; /* For the rotation center */
+}
+
+.burger-icon.open .burger-bar--1 {
+  transform: rotate(45deg);
+  background-color: white; /* Color when open, adjust if menu has different bg */
+}
+
+.burger-icon.open .burger-bar--2 {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.burger-icon.open .burger-bar--3 {
+  transform: rotate(-45deg);
+  background-color: white; /* Color when open */
+}

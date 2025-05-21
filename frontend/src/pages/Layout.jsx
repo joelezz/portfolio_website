@@ -7,7 +7,9 @@ const Layout = () => {
     <>
         <div className="container">
         <Navbar />
-        <Outlet />
+        <main className="main-content-area">
+        <Outlet /> {/* Renders the content of the current route */}
+        </main>
         <Footer />
         </div>
     </>
