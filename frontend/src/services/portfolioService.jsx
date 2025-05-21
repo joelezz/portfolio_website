@@ -1,5 +1,5 @@
 // src/services/portfolioService.js
-const API_BASE_URL = 'http://localhost:5000'; // Your Flask backend URL
+const API_BASE_URL = 'https://portfolio-website-backend-749y.onrender.com'; // Your Flask backend URL
 
 export const getPublicProjects = async () => {
     try {

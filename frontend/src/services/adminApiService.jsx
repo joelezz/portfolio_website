@@ -1,5 +1,5 @@
 // src/services/adminApiService.js
-const API_ADMIN_BASE_URL = 'http://localhost:5000/api/admin'; // Or just use API_BASE_URL + '/admin'
+const API_ADMIN_BASE_URL = 'https://portfolio-website-backend-749y.onrender.com/api/admin'; // Or just use API_BASE_URL + '/admin'
 
 // Helper for making authenticated requests
 const adminRequest = async (endpoint, method = 'GET', body = null, token, isFormData = false) => {
