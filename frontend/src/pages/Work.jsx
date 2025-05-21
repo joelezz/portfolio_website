@@ -64,7 +64,7 @@ const Work = () => {
         if (!window.confirm('Are you sure you want to delete this project?')) return;
 
         try {
-            const response = await fetch(`http://localhost:5000/api/admin/projects/${projectId}`, {
+            const response = await fetch(`https://portfolio-website-backend-749y.onrender.com/api/admin/projects/${projectId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
