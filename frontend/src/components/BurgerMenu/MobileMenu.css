@@ -8,8 +8,7 @@
   position: fixed; /* Or absolute if parent is relative and full screen */
   top: 0;
   right: -100%; /* Start off-screen to the right */
-  width: 70%; /* Or your desired width, e.g., 250px */
-  max-width: 300px;
+  width: 100%; /* Or your desired width, e.g., 250px */
   height: 100vh;
   padding: 2rem;
   box-shadow: -2px 0 5px rgba(0,0,0,0.2);
