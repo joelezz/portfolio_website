@@ -29,14 +29,18 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 app = Flask(__name__)
 
-# Replace with a more specific configuration:
+# Updated CORS configuration
+allowed_origins = os.environ.get(
+    'ALLOWED_ORIGINS', 
+    'http://localhost:5173,https://portfolio-website-u9t8.onrender.com'
+).split(',')
+
 CORS(
     app,
-    resources={r"/api/*": {"origins": "http://localhost:5173"}}, # Allow your React app's origin for all /api/* routes
-    allow_headers=["Authorization", "Content-Type"], # Explicitly allow these headers
-    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"], # Explicitly allow these methods
-    supports_credentials=True # If you plan to use cookies or authentication sessions that rely on credentials
-    # expose_headers=["Authorization"] # Use if your login response sends a new token in an Authorization header that JS needs to read
+    resources={r"/api/*": {"origins": allowed_origins}},
+    allow_headers=["Authorization", "Content-Type"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    supports_credentials=True
 )
 
 # --- App Configuration ---
@@ -369,19 +373,42 @@ def uploaded_file(filename):
 # @app.route('/admin/edit/<int:project_id>', methods=['GET', 'POST']) ...
 # @app.route('/admin/delete/<int:project_id>', methods=['POST']) ...
 
-# --- Initialize Database ---
-def initialize_database():
-    with app.app_context():
-        db.create_all()
-        print("Database tables checked/created (AdminUser, Project, FormData).")
-        if not AdminUser.query.filter_by(username='admin').first():
-            default_admin_password = os.environ.get('DEFAULT_ADMIN_PASSWORD', 'adminpass123') # CHANGE IN PRODUCTION
-            admin = AdminUser(username='admin')
-            admin.set_password(default_admin_password)
-            db.session.add(admin)
-            db.session.commit()
-            print(f"Default admin user 'admin' created with password: {default_admin_password}. Please change this or use env var.")
 
+# --- Database Initialization and Default Admin User ---
+# This block will run when Gunicorn (or any other process) imports main.py
+# It ensures tables are created and a default admin exists if needed.
+with app.app_context(): # Crucial to operate within Flask's application context
+    db.create_all()
+    print("Database tables checked/created (FormData, Project, AdminUser).")
+    # Create a default admin user IF ONE DOESN'T EXIST
+    # You can make the username and password configurable via environment variables
+    admin_username = os.environ.get('DEFAULT_ADMIN_USERNAME', 'admin')
+    if not AdminUser.query.filter_by(username=admin_username).first():
+        default_admin_password = os.environ.get('DEFAULT_ADMIN_PASSWORD', 'adminpass123') # CHANGE THIS IN PRODUCTION ENV VARS
+        admin = AdminUser(username=admin_username)
+        admin.set_password(default_admin_password)
+        db.session.add(admin)
+        db.session.commit()
+        print(f"Default admin user '{admin_username}' created/ensured. "
+              f"If password was default, please change it or use strong environment variables.")
+    elif os.environ.get('RESET_ADMIN_PASSWORD') and AdminUser.query.filter_by(username=admin_username).first():
+        # Optional: Way to reset admin password via an environment variable on app restart
+        admin_to_reset = AdminUser.query.filter_by(username=admin_username).first()
+        admin_to_reset.set_password(os.environ.get('RESET_ADMIN_PASSWORD'))
+        db.session.commit()
+        print(f"Admin user '{admin_username}' password has been reset based on RESET_ADMIN_PASSWORD env var.")
+
+
+# This block is now ONLY for running the app with Flask's development server (e.g., python main.py)
+# Render will use Gunicorn and a different start command.
 if __name__ == '__main__':
-    initialize_database()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # For local development, debug mode can be controlled by FLASK_DEBUG environment variable
+    # Set FLASK_DEBUG=1 in your .env.local for local debug mode
+    # Flask's app.run() respects this by default if debug argument is not explicitly set.
+    # Or, be explicit for local runs:
+    is_debug_mode = os.environ.get('FLASK_DEBUG', '0').lower() in ['true', '1', 't']
+    
+    # The initialize_database() call is effectively handled by the block above when the module loads.
+    # So, no need to call it explicitly again here unless you have specific reasons.
+
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=is_debug_mode)
