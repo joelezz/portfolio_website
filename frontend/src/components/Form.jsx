@@ -1,20 +1,26 @@
 import React, { useState, useEffect } from "react";
 
 const FormComponent = () => {
-  const [data, setData] = useState({
+  const initialFormState = { // Define initial state for easy reset
     name: "",
     email: "",
     phone: "",
     message: "",
-  });
+  };
+  const [data, setData] = useState(initialFormState);
 
+  // Your useEffect (see note below)
   useEffect(() => {
+    // ... (your existing fetch logic, but consider if it should run on mount with empty data)
+    // This POST request on mount with empty initial data is unusual.
+    // Is it meant to register a view, or perhaps fetch initial data instead?
+    // For now, let's assume it's intentional for your backend.
     fetch("https://portfolio-website-backend-749y.onrender.com/form_data", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
+      body: JSON.stringify({ // This will send empty strings initially
         form_name: data.name,
         form_email: data.email,
         form_phone: data.phone,
@@ -23,13 +29,12 @@ const FormComponent = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("Fetched data:", data);
+        console.log("Fetched data on mount:", data);
       })
       .catch((err) => {
-        console.error("Error fetching:", err);
+        console.error("Error fetching on mount:", err);
       });
-  }, []);
-  
+  }, []); // Empty dependency array means this runs once on mount
 
   const handleChange = (e) => {
     setData({
@@ -42,7 +47,6 @@ const FormComponent = () => {
     e.preventDefault();
     console.log("Form submitted:", data);
 
-    // You can send the form data to Flask here
     fetch("https://portfolio-website-backend-749y.onrender.com/form_submit", {
       method: "POST",
       headers: {
@@ -50,65 +54,70 @@ const FormComponent = () => {
       },
       body: JSON.stringify(data),
     })
-      .then((res) => res.json())
-      .then((response) => console.log("Server response:", response))
-      .catch((error) => console.error("Error:", error));
-
-      var allInputs = document.querySelectorAll('input'); // logic to clear the form after submitting the data
-      allInputs.forEach(singleInput => singleInput.value = '');
-      var textarea = document.querySelectorAll('textarea');
-      textarea.forEach(singleInput => singleInput.value = '')
-        };
+      .then((res) => {
+        // Check if the response is ok before trying to parse as JSON
+        if (!res.ok) {
+          // If server sends non-JSON error or empty response for errors
+          return res.text().then(text => { throw new Error(text || `Server responded with ${res.status}`) });
+        }
+        return res.json();
+      })
+      .then((response) => {
+        console.log("Server response:", response);
+        // Clear the form by resetting the state
+        setData(initialFormState); // <--- THE REACT WAY TO CLEAR THE FORM
+      })
+      .catch((error) => {
+        console.error("Error submitting form:", error);
+        // Optionally, you might want to inform the user about the error
+        // and not clear the form so they can try again.
+      });
+  };
 
   return (
     <div className="form-container">
       <form className="form" onSubmit={handleSubmit}>
-
         <label>
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={data.name}
-          onChange={handleChange}
-        />
+          <input
+            type="text"
+            name="name"
+            placeholder="Name"
+            value={data.name}
+            onChange={handleChange}
+          />
         </label>
         <label>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={data.email}
-          onChange={handleChange}
-        />
-        </label>
-
-        <label>
-        <input
-          type="text"
-          name="phone"
-          placeholder="Phone"
-          value={data.phone}
-          onChange={handleChange}
-        />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={data.email}
+            onChange={handleChange}
+          />
         </label>
         <label>
-        <textarea
-          name="message"
-          className="message"
-          placeholder="Your message"
-          value={data.message}
-          onChange={handleChange}
-        ></textarea>
+          <input
+            type="text"
+            name="phone"
+            placeholder="Phone"
+            value={data.phone}
+            onChange={handleChange}
+          />
         </label>
-
+        <label>
+          <textarea
+            name="message"
+            className="message"
+            placeholder="Your message"
+            value={data.message}
+            onChange={handleChange}
+          ></textarea>
+        </label>
         <div>
-        <input className="submit-btn" type="submit" value="Submit" />
+          <input className="submit-btn" type="submit" value="Submit" />
         </div>
-        
       </form>
     </div>
-    
   );
 };
 

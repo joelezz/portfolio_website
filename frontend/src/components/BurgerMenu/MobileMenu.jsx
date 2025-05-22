@@ -29,7 +29,7 @@ const MobileMenu = ({ isOpen, closeMenu }) => {
           <button onClick={handleLogoutClick} className="logout-button">Logout</button>
         </>
       ) : (
-        <NavLink to="/login" onClick={handleLinkClick} className={({isActive}) => isActive ? "active-link" : ""}>Login</NavLink>
+        <NavLink to="/dashboard" onClick={handleLinkClick} className={({isActive}) => isActive ? "active-link" : ""}>Login</NavLink>
       )}
     </nav>
   );

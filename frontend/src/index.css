@@ -13,11 +13,13 @@
 }
 
 .main-content-area {
-  flex-grow: 1; /* This is key: allows this element to grow and take up available space, pushing the footer down */
+  flex-grow: 1;
   min-height: 80vh;
   display: flex;
   flex-direction: column;
-  /* Add any padding or other styles for your main content area here */
+  width: 100%;
+  padding: 0 10px;
+  box-sizing: border-box;
 }
 
 body { /* Or #root, .app-container, etc. */
@@ -25,7 +27,7 @@ body { /* Or #root, .app-container, etc. */
   flex-direction: column; /* Stack children (header, main, footer) vertically */
   min-height: 100vh;     /* Ensure the wrapper is at least the full viewport height */
   margin: 0;             /* Remove default body margin */
-
+  padding: 0;
   /* Your existing body styles */
   text-align: center;
   background-color: rgb(2, 0, 60);
@@ -35,8 +37,11 @@ body { /* Or #root, .app-container, etc. */
 h1 {
   color: var(--text-primary);
   text-shadow: 2px 2px 4px #ffffff;
-  margin: 5% 10% 5% 10%;
-  font-size: 72px;
+  margin: 5% 5% 5% 5%;
+    line-height: 1;
+  font-size: 21em;
+    word-wrap: break-word;
+
 }
 
 h1:hover {
@@ -46,11 +51,13 @@ h1:hover {
 
 h3{
   color:rgb(255, 255, 255);
+  font-size: 10em;
+  margin: 10px 5%;
 }
 
 p {
   color:aliceblue;
-  font-size: large;
+  font-size:28px;
   margin-bottom: auto;
   letter-spacing: 5px;
   line-height: 1.8;
@@ -90,7 +97,7 @@ span {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px; /* Or your site's max content width */
+  max-width: 100vh; /* Or your site's max content width */
   margin: 0 auto; /* Center the container */
 }
 .navbar-brand {
@@ -157,7 +164,7 @@ span {
 }
 
 .desktop-navigation li {
-  margin-left: 20px; /* Space between links */
+  margin-left: 40px; /* Space between links */
 }
 
 .desktop-navigation a,
@@ -241,7 +248,7 @@ span {
 }
 
 .container {
-  margin: 0 25%;
+  margin:0 10%;
 }
 
 a {
@@ -282,30 +289,67 @@ a {
   font-size: 14px;
 }
 
-.form-container{
+/* Form container base styles */
+.form-container {
   border: 1px dotted rgb(255, 255, 255);
-  margin: 20px;
-  padding: 20px;
   background-color: rgba(38, 38, 38, 0.382);
+  margin: 15em 5em;
+  padding: 2em;
+  box-sizing: border-box;
 }
 
 form {
   display: flex;
   flex-direction: column;
   font-size: large;
+  margin: auto;
 
 }
 
-.login-form{
+.form input:focus textarea:focus{
+  color: rgb(0, 0, 60);
+}
+
+
+/* Base input styles - apply to all inputs */
+input, textarea {
+  width: 100%;
+  border: none;
+  margin: 0.5em;
+  box-sizing: border-box; /* This is crucial for proper width calculation */
+}
+
+/* Form container base styles */
+.form-container {
   border: 1px dotted rgb(255, 255, 255);
-  margin: 20px;
-  padding: 20px 20px 20px 20px;
   background-color: rgba(38, 38, 38, 0.382);
-
+  margin: 15em 5em;
+  padding: 2em;
+  box-sizing: border-box;
 }
-.login-form input{
-  width: 150px;
-  height: 30px;
+
+/* Login form base styles */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  border: 1px dotted rgb(255, 255, 255);
+  background-color: rgba(38, 38, 38, 0.382);
+  margin: auto;
+  padding: 5em;
+  box-sizing: border-box;
+}
+
+.login-form input {
+  width: 100% !important; /* Force 100% width */
+  margin: 2em 0 1em 0;
+  border: 1px dotted;
+  margin: 0.5em;
+  font-size: x-large;
+  box-sizing: border-box;
+}
+
+.login-form input:focus{
+  background-color: var(--accent-purple);
 }
 .login-form button{
   margin: 20px;
@@ -316,16 +360,12 @@ label {
   color: #ffffff;
 }
 
-input{
-  width:100%;
-  border: none;
-}
-
-textarea {
+/* Base input styles - apply to all inputs */
+input, textarea {
   width: 100%;
-  min-height: 50px;
   border: none;
-
+  margin: 0.5em;
+  box-sizing: border-box; /* This is crucial for proper width calculation */
 }
 
 .username{
@@ -337,14 +377,18 @@ textarea {
 }
 
 .submit-btn{
-  width: 100px;
-  height: 50px;
-  font-size: large;
+  width: 5em;
+  height: 2em;
+  font-size: x-large;
   font-weight: bolder;
+  padding: auto;
   color: rgb(255, 255, 255);
   background-color: transparent;
   border: none;
 
+}
+.submit-btn:active{
+color: rebeccapurple;
 }
 
 .submit-btn:hover{
@@ -462,9 +506,142 @@ text-decoration: none;
   flex-wrap: wrap;
 }
 
-.project-text-paragraph{
+
+
+/* Large screens (desktop) */
+@media (max-width: 2800px) {
+  .form-container {
+    border: 1px dotted rgb(255, 255, 255);
+    background-color: rgba(38, 38, 38, 0.382);
+    margin: 15em 10em 0em 10em;
+    padding: 2em;
+  }
+  
+  form input {
+    width: 100%; /* Changed from max-width: 50% to width: 100% */
+    min-height: 1em;
+    font-size: x-large;
+    border: 1px dotted;
+    box-sizing: border-box;
+  }
 }
 
-.project-text-link{
+
+/* Medium screens */
+@media (max-width: 1200px) {
+  .form-container {
+    border: 1px dotted rgb(255, 255, 255);
+    background-color: rgba(38, 38, 38, 0.382);
+    margin: 15em 5em;
+    padding: 2em;
+  }
+  
+  form input {
+    width: 100%; /* Changed from max-width: 50% to width: 100% */
+    min-height: 1em;
+    font-size: x-large;
+    border: 1px dotted;
+    box-sizing: border-box;
+  }
+}
+
+/* Small screens (mobile) - FIXED */
+@media (max-width: 750px) {
+  .container {
+    margin: 0 10%;
+  }
+  
+  .main-content-area {
+    width: 100%;  
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-container {
+    border: 1px dotted rgb(255, 255, 255);
+    margin: 2em 1em; /* Reduced side margins for mobile */
+    padding: 1.5em; /* Reduced padding for mobile */
+    background-color: rgba(38, 38, 38, 0.382);
+    box-sizing: border-box;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* ALL form inputs on mobile */
+  form input,
+  .login-form input,
+  input,
+  textarea {
+    width: 100% !important; /* Force 100% width on all inputs */
+    max-width: none !important; /* Remove any max-width constraints */
+    border: 1px dotted;
+    font-size: large; /* Slightly smaller font for mobile */
+    padding: 0.5em;
+    margin: 0.5em 0; /* Only top/bottom margin */
+    box-sizing: border-box;
+  }
+
+  .login-form {
+    border: 1px dotted rgb(255, 255, 255);
+    background-color: rgba(38, 38, 38, 0.382);
+    margin: 2em 0; /* Remove side margins */
+    padding: 2em 1em; /* Reduce side padding */
+    box-sizing: border-box;
+  }
+  
+  textarea {
+    width: 100% !important;
+    min-height: 8em; /* Reduce height for mobile */
+    font-size: large; /* Smaller font for mobile */
+  }
+
+@keyframes color-change {
+  0% { color:  rgb(255, 255, 255); }
+  33% { color: rgb(163, 255, 253); }
+  66% { color: rgb(252, 255, 160) }
+  100% { color:rgb(255, 255, 255) }
+}
+
+h1 {
+  font-size: xx-large;
+}
+
+p {
+  color:aliceblue;
+  font-size: large;
+  margin-bottom: auto;
+
+}
+.main-textarea{
+  margin: 0;
+}
+
+.tech-logo {
+  width: 100px;
+}
+
+.form-container{
+  border: 1px dotted rgb(255, 255, 255);
+  margin: 2em 0;
+  background-color: rgba(38, 38, 38, 0.382);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-form{
+  border: 1px dotted rgb(255, 255, 255);
+  background-color: rgba(38, 38, 38, 0.382);
+
+}
+.login-form input{
+  width: 100%;
+  border: 1px dotted;
+}
 
 }

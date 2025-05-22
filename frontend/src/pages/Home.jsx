@@ -2,11 +2,11 @@ import React from 'react'
 
 const Home = () => {
   return (
-      <>
-      <h1>Joel E<span>zz</span>ahid – Web Developer</h1> 
-      <div className='main-textarea'>
-            <p>I have more than two years of experience in programming, focusing on building dynamic, user-friendly applications with React and Python. While I’m currently expanding my skills, particularly in full-stack development, I’ve worked on various projects involving frontend interfaces and backend functionality using React and Flask.</p>    
-      </div>
+      <>     
+      <h1>Joel        <br /> E<span>zz</span>ahid</h1> 
+ 
+      <section id="home">
+            <p>Ready to see what modern web development can really do? I craft user-friendly, dynamic experiences from cutting-edge React frontends to intelligent AI integrations. Welcome!</p>    
       <div>
       <a target='_blank'
             rel='noopener noreferrer' href="https://python.org"><img className='tech-logo' src="./python_logo.png"/></a>
@@ -17,9 +17,8 @@ const Home = () => {
       <a target='_blank'
             rel='noopener noreferrer' href="https://react.dev/"><img className='tech-logo' src="./react_logo.png"/></a> 
       </div>
-
-            
-            </>
+      </section>
+      </>
   )
 }
 
