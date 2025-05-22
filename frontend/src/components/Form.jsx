@@ -114,7 +114,7 @@ const FormComponent = () => {
           ></textarea>
         </label>
         <div>
-          <input className="submit-btn" type="submit" value="Submit" />
+          <input className="submit-btn" type="submit" value="Send" />
         </div>
       </form>
     </div>

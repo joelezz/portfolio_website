@@ -289,22 +289,14 @@ a {
   font-size: 14px;
 }
 
-/* Form container base styles */
-.form-container {
-  border: 1px dotted rgb(255, 255, 255);
-  background-color: rgba(38, 38, 38, 0.382);
-  margin: 15em 5em;
-  padding: 2em;
-  box-sizing: border-box;
-}
-
 form {
   display: flex;
   flex-direction: column;
   font-size: large;
   margin: auto;
-
 }
+
+
 
 .form input:focus textarea:focus{
   color: rgb(0, 0, 60);
@@ -319,14 +311,6 @@ input, textarea {
   box-sizing: border-box; /* This is crucial for proper width calculation */
 }
 
-/* Form container base styles */
-.form-container {
-  border: 1px dotted rgb(255, 255, 255);
-  background-color: rgba(38, 38, 38, 0.382);
-  margin: 15em 5em;
-  padding: 2em;
-  box-sizing: border-box;
-}
 
 /* Login form base styles */
 .login-form {
@@ -376,20 +360,17 @@ input, textarea {
   width: 20%;
 }
 
-.submit-btn{
-  width: 5em;
-  height: 2em;
-  font-size: x-large;
-  font-weight: bolder;
-  padding: auto;
-  color: rgb(255, 255, 255);
-  background-color: transparent;
-  border: none;
+    .submit-btn{
+      width: 5em;
+      height: 2em;
+      font-size: x-large;
+      font-weight: bolder;
+      padding: auto;
+      color: rgb(255, 255, 255);
+      background-color: transparent;
+      border: none;
 
-}
-.submit-btn:active{
-color: rebeccapurple;
-}
+    }
 
 .submit-btn:hover{
   filter: drop-shadow(white 0.05rem 0.05rem);
@@ -452,7 +433,6 @@ color: rebeccapurple;
 }
 
 
-
 .project-card{
   max-width: 400px;;
   height: auto;
@@ -513,8 +493,8 @@ text-decoration: none;
   .form-container {
     border: 1px dotted rgb(255, 255, 255);
     background-color: rgba(38, 38, 38, 0.382);
-    margin: 15em 10em 0em 10em;
-    padding: 2em;
+    margin: 15em 5em 0em 5em;
+    padding: 10em;
   }
   
   form input {
@@ -523,6 +503,11 @@ text-decoration: none;
     font-size: x-large;
     border: 1px dotted;
     box-sizing: border-box;
+  }
+  form textarea {
+        min-height: 5em;
+        font-size: x-large;
+
   }
 }
 
@@ -633,6 +618,18 @@ form {
   display: flex;
   flex-direction: column;
 }
+
+input .submit-btn{
+      width: 5em;
+      height: 2em;
+      font-size: x-large;
+      font-weight: bolder;
+      padding: auto;
+      color: rgb(255, 255, 255);
+      background-color: transparent;
+      border: none;
+
+    }
 
 .login-form{
   border: 1px dotted rgb(255, 255, 255);
