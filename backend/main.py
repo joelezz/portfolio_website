@@ -32,7 +32,7 @@ app = Flask(__name__)
 # Updated CORS configuration
 allowed_origins = os.environ.get(
     'ALLOWED_ORIGINS', 
-    'http://localhost:5173,https://portfolio-website-u9t8.onrender.com'
+    'http://localhost:5173,https://www.joelezzahid.com'
 ).split(',')
 
 CORS(
@@ -126,10 +126,13 @@ def save_image(file_storage): # Renamed 'file' to 'file_storage' to avoid shadow
         unique_filename = f"{name}_{timestamp}{ext}"
         try:
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+            print(f"Attempting to save file to: {file_path}")  
             file_storage.save(file_path)
+            print(f"File saved successfully: {unique_filename}") 
             return unique_filename
         except Exception as e:
             app.logger.error(f"Failed to save image {unique_filename}: {e}")
+            print(f"Save error: {e}")  
             return None
     return None
 
