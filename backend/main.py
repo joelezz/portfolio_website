@@ -1,4 +1,4 @@
-# main.py (Corrected API Routes for Public and Admin)
+# main.py
 import os
 from flask import Flask, request, jsonify, url_for, send_from_directory # render_template, redirect, flash (if keeping server-side admin)
 from flask_cors import CORS
@@ -12,14 +12,6 @@ from dotenv import load_dotenv
 # --- JWT IMPORT ---
 from flask_jwt_extended import create_access_token, jwt_required, JWTManager, get_jwt_identity
 
-# Keeping these as they were in your last version, but they are not strictly needed for the React admin API focus
-# from flask_restful import Resource, Api
-# from flask_mail import Mail, Message
-# from flask_wtf import FlaskForm
-# from wtforms import StringField, TextAreaField, URLField, SubmitField
-# from wtforms.validators import DataRequired, Optional, URL
-# from flask_wtf.file import FileField, FileAllowed
-
 load_dotenv('.env.local')
 
 # --- General Configuration ---
@@ -31,13 +23,13 @@ app = Flask(__name__)
 
 # Updated CORS configuration
 allowed_origins = os.environ.get(
-    'ALLOWED_ORIGINS', 
-    'http://localhost:5173,https://www.joelezzahid.com'
+    'ALLOWED_ORIGINS',
+    'http://localhost:5173,https://www.joelezzahid.com' # Default values
 ).split(',')
 
 CORS(
     app,
-    resources={r"/api/*": {"origins": allowed_origins}},
+    resources={r"/api/*": {"origins": allowed_origins}}, # Ensure your form routes start with /api/
     allow_headers=["Authorization", "Content-Type"],
     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     supports_credentials=True
@@ -45,10 +37,10 @@ CORS(
 
 # --- App Configuration ---
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'your_very_strong_and_unique_secret_key_here_CHANGE_ME')
-app.config['JWT_SECRET_KEY'] = app.config['SECRET_KEY']
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1) # Or timedelta(days=1)
+app.config['JWT_SECRET_KEY'] = app.config['SECRET_KEY'] # Can be the same or different
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 
-# PostgreSQL Config (using yours)
+# PostgreSQL Config
 postgres_password = os.environ.get('POSTGRES_PASSWORD')
 app.config['SQLALCHEMY_DATABASE_URI'] = (
     f"postgresql+psycopg2://avnadmin:{postgres_password}"
@@ -61,8 +53,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # --- Initialize Extensions ---
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
-# mail = Mail(app) # If keeping contact form functionality
-# api = Api(app)   # If keeping Flask-RESTful parts
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -99,9 +89,9 @@ class Project(db.Model):
     def to_dict(self, include_image_url_base=None):
         image_full_url = None
         if self.image_filename:
-            if include_image_url_base: # For absolute URLs needed by external clients
+            if include_image_url_base:
                 image_full_url = f"{include_image_url_base.rstrip('/')}{url_for('uploaded_file', filename=self.image_filename)}"
-            else: # For relative URLs if client is on same host/port or constructs it
+            else:
                 image_full_url = url_for('uploaded_file', filename=self.image_filename, _external=False)
         return {
             'id': self.id,
@@ -113,32 +103,52 @@ class Project(db.Model):
             'date_added': self.date_added.isoformat() if self.date_added else None
         }
 
+# NEW: Contact Form Submission Model
+class ContactSubmission(db.Model):
+    __tablename__ = 'contact_submissions'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), nullable=False)
+    phone = db.Column(db.String(50), nullable=True)  # Assuming phone is optional
+    message = db.Column(db.Text, nullable=False)
+    submission_date = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+
+    def __repr__(self):
+        return f'<ContactSubmission {self.name} - {self.email}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'email': self.email,
+            'phone': self.phone,
+            'message': self.message,
+            'submission_date': self.submission_date.isoformat() if self.submission_date else None
+        }
+# END NEW
+
 # --- Helper Functions for File Upload ---
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def save_image(file_storage): # Renamed 'file' to 'file_storage' to avoid shadowing built-in
+def save_image(file_storage):
     if file_storage and file_storage.filename and allowed_file(file_storage.filename):
         filename = secure_filename(file_storage.filename)
-        # Make filenames unique to prevent overwrites
         timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')
         name, ext = os.path.splitext(filename)
         unique_filename = f"{name}_{timestamp}{ext}"
         try:
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
-            print(f"Attempting to save file to: {file_path}")  
             file_storage.save(file_path)
-            print(f"File saved successfully: {unique_filename}") 
             return unique_filename
         except Exception as e:
             app.logger.error(f"Failed to save image {unique_filename}: {e}")
-            print(f"Save error: {e}")  
             return None
     return None
 
 # --- API Endpoints ---
 
-# Authentication & Admin User Management (prefixed with /api/admin/)
+# Authentication & Admin User Management
 @app.route('/api/admin/register', methods=['POST'])
 def register_admin_api():
     data = request.get_json()
@@ -167,10 +177,11 @@ def admin_login_api():
         return jsonify(access_token=access_token, user={"id": user.id, "username": user.username}), 200
     return jsonify({"message": "Invalid credentials"}), 401
 
-# --- Admin Project CRUD APIs (prefixed with /api/admin/ and protected) ---
+# --- Admin Project CRUD APIs ---
 @app.route('/api/admin/projects', methods=['GET'])
 @jwt_required()
 def admin_get_all_projects_api():
+    # ... (your existing code) ...
     current_user_id = get_jwt_identity()
     app.logger.info(f"Admin user {current_user_id} fetching all projects.")
     try:
@@ -180,9 +191,11 @@ def admin_get_all_projects_api():
         app.logger.error(f"Error fetching projects for admin {current_user_id}: {e}", exc_info=True)
         return jsonify({"message": "Could not retrieve projects", "error_details": str(e)}), 500
 
+
 @app.route('/api/admin/projects', methods=['POST'])
 @jwt_required()
 def admin_create_project_api():
+    # ... (your existing detailed code with validation and error handling) ...
     current_user_id = get_jwt_identity()
     app.logger.info(f"Admin user {current_user_id} attempting to create a project.")
     app.logger.debug(f"Received Form Data for POST /api/admin/projects: {request.form}")
@@ -209,11 +222,11 @@ def admin_create_project_api():
             else:
                 image_filename_candidate = save_image(file_storage)
                 if image_filename_candidate:
-                    if len(image_filename_candidate) > 100: # Check length of processed filename
+                    if len(image_filename_candidate) > 100: 
                         errors['image'] = "Processed image filename is too long (max 100). Try a shorter original filename."
                     else:
                         image_filename = image_filename_candidate
-                else: # save_image returned None but a file was present
+                else: 
                     errors['image'] = "Image could not be saved. Check server logs or file type."
     if errors:
         return jsonify({"message": "Validation failed", "errors": errors}), 422
@@ -229,7 +242,7 @@ def admin_create_project_api():
         db.session.commit()
         app.logger.info(f"Project '{new_project.name}' created by admin {current_user_id}.")
         return jsonify(new_project.to_dict(include_image_url_base=request.host_url)), 201
-    except IntegrityError as e: # Specific DB errors
+    except IntegrityError as e: 
         db.session.rollback()
         app.logger.error(f"DB IntegrityError on create project by admin {current_user_id}: {e}", exc_info=True)
         return jsonify({"message": "Database integrity error.", "error_details": str(e.orig)}), 409
@@ -246,6 +259,7 @@ def admin_create_project_api():
 @app.route('/api/admin/projects/<int:project_id>', methods=['PUT'])
 @jwt_required()
 def admin_update_project_api(project_id):
+    # ... (your existing detailed code with validation and error handling) ...
     current_user_id = get_jwt_identity()
     project = db.session.get(Project, project_id)
     if not project:
@@ -256,7 +270,7 @@ def admin_update_project_api(project_id):
     app.logger.debug(f"Received Files for PUT /api/admin/projects/{project_id}: {request.files}")
 
     errors = {}
-    name = request.form.get('name', project.name) # Default to current if not provided
+    name = request.form.get('name', project.name) 
     description = request.form.get('description', project.description if project.description is not None else '')
     project_url = request.form.get('project_url', project.project_url if project.project_url is not None else '')
     
@@ -264,30 +278,28 @@ def admin_update_project_api(project_id):
         errors['name'] = "Project name is required and cannot be empty."
     elif len(name) > 100:
         errors['name'] = "Project name must be 100 characters or less."
-    if project_url and len(project_url) > 255: # project_url can be empty string if user clears it
+    if project_url and len(project_url) > 255: 
         errors['project_url'] = "Project URL must be 255 characters or less."
 
-    new_image_filename = project.image_filename # Keep old image by default
+    new_image_filename = project.image_filename 
     if 'image' in request.files:
         file_storage = request.files['image']
-        if file_storage and file_storage.filename: # New image uploaded
+        if file_storage and file_storage.filename: 
             if not allowed_file(file_storage.filename):
                 errors['image'] = f"File type not allowed. Allowed: {', '.join(ALLOWED_EXTENSIONS)}."
             else:
-                # Delete old image file if it exists and a new one is successfully processed
                 candidate_filename = save_image(file_storage)
                 if candidate_filename:
                     if len(candidate_filename) > 100:
-                         errors['image'] = "Processed new image filename is too long (max 100)."
+                            errors['image'] = "Processed new image filename is too long (max 100)."
                     else:
-                        # Successfully saved new image, prepare to delete old one
                         if project.image_filename:
                             old_image_path = os.path.join(app.config['UPLOAD_FOLDER'], project.image_filename)
                             if os.path.exists(old_image_path):
                                 try: os.remove(old_image_path)
                                 except OSError as e: app.logger.warning(f"Error deleting old image {project.image_filename}: {e}")
-                        new_image_filename = candidate_filename # Set project to use new image
-                else: # save_image returned None
+                        new_image_filename = candidate_filename 
+                else: 
                     errors['image'] = "New image could not be saved. Check server logs or file type."
     if errors:
         return jsonify({"message": "Validation failed", "errors": errors}), 422
@@ -317,15 +329,15 @@ def admin_update_project_api(project_id):
 @app.route('/api/admin/projects/<int:project_id>', methods=['DELETE'])
 @jwt_required()
 def admin_delete_project_api(project_id):
+    # ... (your existing code) ...
     current_user_id = get_jwt_identity()
     project = db.session.get(Project, project_id)
     if not project:
         return jsonify({"message": "Project not found"}), 404
     try:
-        image_to_delete = project.image_filename # Get filename before deleting project object
+        image_to_delete = project.image_filename 
         db.session.delete(project)
         db.session.commit()
-        # Delete the associated image file after successful DB deletion
         if image_to_delete:
             image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_to_delete)
             if os.path.exists(image_path):
@@ -340,12 +352,11 @@ def admin_delete_project_api(project_id):
 
 # --- PUBLIC API Endpoint (for your React portfolio frontend to display projects) ---
 @app.route('/api/projects', methods=['GET'])
-# NO @jwt_required() here
 def get_public_projects_api():
+    # ... (your existing code) ...
     app.logger.info("Public request to /api/projects")
     try:
         projects = Project.query.order_by(Project.date_added.desc()).all()
-        # Pass request.host_url to generate absolute URLs for images
         return jsonify([p.to_dict(include_image_url_base=request.host_url) for p in projects])
     except Exception as e:
         app.logger.error(f"Error fetching public projects: {e}", exc_info=True)
@@ -356,62 +367,94 @@ def get_public_projects_api():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-# --- Your existing contact form submission route and other Flask-RESTful APIs ---
-# (Keep them if needed, they are separate from the project admin API)
-# class FormData(db.Model): ... (already defined)
-# class FormAPI(Resource): ... (already defined by you)
-# api.add_resource(FormAPI, '/form/<int:form_id>')
-# @app.route('/form_submit', methods=['POST']) def add_form_data(): ... (already defined by you)
+# --- NEW: Contact Form API Endpoints ---
+@app.route('/api/form_submit', methods=['POST'])
+def handle_form_submit():
+    """
+    Handles submissions from the main contact form.
+    Expects JSON: {"name": "...", "email": "...", "phone": "...", "message": "..."}
+    """
+    if not request.is_json:
+        return jsonify({"message": "Request must be JSON"}), 400
 
-# --- Optional: Server-Side Rendered Admin (Comment out if not using with React Admin) ---
-# If you are building a PURE React admin, these routes are not needed by React.
-# They can be kept for direct server-side admin access if desired, or removed.
-# from flask_wtf import FlaskForm
-# from wtforms import StringField, TextAreaField, URLField, SubmitField, FileField
-# from wtforms.validators import DataRequired, Optional, URL, FileAllowed
-# class ProjectForm(FlaskForm): ... (already defined by you)
+    data = request.get_json()
+    name = data.get('name')
+    email = data.get('email')
+    phone = data.get('phone') # Optional
+    message = data.get('message')
 
-# @app.route('/admin/') ... (your server-side dashboard)
-# @app.route('/admin/add', methods=['GET', 'POST']) ... (your server-side add project)
-# @app.route('/admin/edit/<int:project_id>', methods=['GET', 'POST']) ...
-# @app.route('/admin/delete/<int:project_id>', methods=['POST']) ...
+    errors = {}
+    if not name: errors['name'] = "Name is required."
+    if not email: errors['email'] = "Email is required."
+    if not message: errors['message'] = "Message is required."
+    # Basic email format check (can be more sophisticated)
+    if email and '@' not in email: errors['email_format'] = "Invalid email format."
+
+
+    if errors:
+        return jsonify({"message": "Validation errors", "errors": errors}), 422
+
+    try:
+        new_submission = ContactSubmission(
+            name=name,
+            email=email,
+            phone=phone,
+            message=message
+        )
+        db.session.add(new_submission)
+        db.session.commit()
+        app.logger.info(f"New contact form submission from {name} ({email}).")
+        return jsonify({"message": "Form submitted successfully!", "submission": new_submission.to_dict()}), 201
+    except IntegrityError as e:
+        db.session.rollback()
+        app.logger.error(f"Database integrity error on form submission: {e}", exc_info=True)
+        return jsonify({"message": "Could not process form due to a database conflict.", "error_details": str(e.orig)}), 409
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error processing form submission: {e}", exc_info=True)
+        return jsonify({"message": "An unexpected error occurred while processing the form.", "error_details": str(e)}), 500
+
+@app.route('/api/form_data', methods=['POST'])
+def handle_form_data_ping():
+    """
+    Handles the POST request made by the frontend's useEffect on mount.
+    Expects JSON: {"form_name": "...", "form_email": "...", "form_phone": "...", "form_message": "..."}
+    Currently, this endpoint just logs the data and acknowledges.
+    It does NOT save to the ContactSubmission table due to differing field names and unclear purpose.
+    """
+    if not request.is_json:
+        return jsonify({"message": "Request must be JSON"}), 400
+
+    data = request.get_json()
+    app.logger.info(f"Received initial form data ping: {data}")
+
+    # You could choose to save this to a different table or process it differently if needed.
+    # For now, just acknowledging.
+    return jsonify({"message": "Initial form data received."}), 200
+# --- END NEW ---
 
 
 # --- Database Initialization and Default Admin User ---
-# This block will run when Gunicorn (or any other process) imports main.py
-# It ensures tables are created and a default admin exists if needed.
-with app.app_context(): # Crucial to operate within Flask's application context
+with app.app_context():
     db.create_all()
-    print("Database tables checked/created (FormData, Project, AdminUser).")
-    # Create a default admin user IF ONE DOESN'T EXIST
-    # You can make the username and password configurable via environment variables
+    # UPDATED print statement
+    print("Database tables checked/created (AdminUser, Project, ContactSubmission).")
+    
     admin_username = os.environ.get('DEFAULT_ADMIN_USERNAME', 'admin')
     if not AdminUser.query.filter_by(username=admin_username).first():
-        default_admin_password = os.environ.get('DEFAULT_ADMIN_PASSWORD', 'adminpass123') # CHANGE THIS IN PRODUCTION ENV VARS
+        default_admin_password = os.environ.get('DEFAULT_ADMIN_PASSWORD', 'adminpass123')
         admin = AdminUser(username=admin_username)
         admin.set_password(default_admin_password)
         db.session.add(admin)
         db.session.commit()
-        print(f"Default admin user '{admin_username}' created/ensured. "
-              f"If password was default, please change it or use strong environment variables.")
+        print(f"Default admin user '{admin_username}' created/ensured.")
     elif os.environ.get('RESET_ADMIN_PASSWORD') and AdminUser.query.filter_by(username=admin_username).first():
-        # Optional: Way to reset admin password via an environment variable on app restart
         admin_to_reset = AdminUser.query.filter_by(username=admin_username).first()
         admin_to_reset.set_password(os.environ.get('RESET_ADMIN_PASSWORD'))
         db.session.commit()
-        print(f"Admin user '{admin_username}' password has been reset based on RESET_ADMIN_PASSWORD env var.")
+        print(f"Admin user '{admin_username}' password has been reset.")
 
 
-# This block is now ONLY for running the app with Flask's development server (e.g., python main.py)
-# Render will use Gunicorn and a different start command.
 if __name__ == '__main__':
-    # For local development, debug mode can be controlled by FLASK_DEBUG environment variable
-    # Set FLASK_DEBUG=1 in your .env.local for local debug mode
-    # Flask's app.run() respects this by default if debug argument is not explicitly set.
-    # Or, be explicit for local runs:
     is_debug_mode = os.environ.get('FLASK_DEBUG', '0').lower() in ['true', '1', 't']
-    
-    # The initialize_database() call is effectively handled by the block above when the module loads.
-    # So, no need to call it explicitly again here unless you have specific reasons.
-
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=is_debug_mode)
