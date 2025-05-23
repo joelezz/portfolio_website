@@ -6,7 +6,7 @@ const Home = () => {
       <h1>Joel        <br /> E<span>zz</span>ahid</h1> 
  
       <section id="home">
-            <p>Ready to see what modern web development can really do? I craft user-friendly, dynamic experiences from cutting-edge React frontends to intelligent AI integrations. Welcome!</p>    
+            <p>Ready to see what modern web development can really do? </p> <br /> <p>I craft user-friendly, dynamic experiences from cutting-edge React frontends to intelligent AI integrations. Welcome!</p>    
       <div>
       <a target='_blank'
             rel='noopener noreferrer' href="https://python.org"><img className='tech-logo' src="./python_logo.png"/></a>
