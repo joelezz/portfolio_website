@@ -102,9 +102,7 @@ const authToken = localStorage.getItem('authToken');
     <>
       {authenticatedUser ? (
         <>
-          <h1>Welcome, {authenticatedUser.name || 'User'}!</h1>
           <div className="form-container">
-            <h3>Add New Project</h3>
             {formError && <p style={{ color: 'red' }}>{formError}</p>}
             {formSuccess && <p style={{ color: 'green' }}>{formSuccess}</p>}
             {/* Using a form element is good practice for accessibility and semantics */}
@@ -157,7 +155,7 @@ const authToken = localStorage.getItem('authToken');
                 {selectedFile && <p>Selected file: {selectedFile.name}</p>}
               </div>
               <button className='submit-btn' type="submit" style={{ marginTop: '20px', marginLeft: "45%" }} disabled={isSubmitting}>
-                {isSubmitting ? 'Adding Project...' : 'Add Project'}
+                {isSubmitting ? 'Adding Project...' : 'Add'}
               </button>
             </form>
           </div>
