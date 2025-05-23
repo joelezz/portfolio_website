@@ -148,6 +148,7 @@ def save_image(file_storage):
 def send_notification_email(submission):
     """Send email notification using Resend"""
     resend.api_key = os.environ.get('RESEND_API_KEY')
+    print("running the send notification function") #
     notification_email = os.environ.get('NOTIFICATION_EMAIL')
     
     if not resend.api_key or not notification_email:
@@ -156,7 +157,7 @@ def send_notification_email(submission):
     
     try:
         resend.Emails.send({
-            "from": "Portfolio <onboarding@resend.dev>",  # Change this after domain verification
+            "from": "Portfolio <hello@joelezzahid.com>", 
             "to": notification_email,
             "subject": f"New Contact Form Submission from {submission.name}",
             "html": f"""
