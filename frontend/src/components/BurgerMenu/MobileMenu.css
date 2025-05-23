@@ -28,7 +28,7 @@
   padding: 1rem 0;
   font-weight: bold;
   letter-spacing: 0.1rem;
-  color: antiquewhite; /* Your light text color */
+  color: antiquewhite;
   text-decoration: none;
   text-align: center;
   width: 100%;
@@ -36,11 +36,11 @@
 
 .mobile-menu a:hover,
 .mobile-menu .logout-button:hover {
-  color: rgb(149, 156, 255); /* Your accent color */
+  color: rgb(149, 156, 255); 
 }
 
 .mobile-menu .active-link {
-    color: rgb(149, 156, 255); /* Your accent color for active link */
+    color: rgb(149, 156, 255); /*  Accent color for active link */
     font-weight: bolder;
 }
 

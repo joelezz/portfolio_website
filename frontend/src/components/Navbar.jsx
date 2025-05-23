@@ -50,7 +50,7 @@ const Navbar = () => {
                         <li><NavLink to="/" end className={({isActive}) => isActive ? "active-nav-link" : "inactive-nav-link"}>Home</NavLink></li>
                         <li><NavLink to="/work" className={({isActive}) => isActive ? "active-nav-link" : "inactive-nav-link"}>Work</NavLink></li>
                         <li><NavLink to="/contact" className={({isActive}) => isActive ? "active-nav-link" : "inactive-nav-link"}>Contact</NavLink></li>
-                        { /*{!isAuthenticated ? (
+                         {!isAuthenticated ? (
                             <li><NavLink to="/dashboard" className={({isActive}) => isActive ? "active-nav-link" : "inactive-nav-link"}>Login</NavLink></li>
                         ) : (
                             <>
@@ -62,7 +62,7 @@ const Navbar = () => {
                                     </button>
                                 </li>
                             </>
-                        )} */}
+                        )} 
                     </ul>
 
                     {/* Hamburger Menu Trigger for Mobile */}
