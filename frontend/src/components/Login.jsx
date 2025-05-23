@@ -45,7 +45,8 @@ export const Login = ({ onLogin }) => {
 
   <>
       <h1>Login area</h1>
-      <div className="login-form">
+      <div className="form-container">
+      <form>
         <p>Provide your credentials, please.</p>
         <label>
           <input
@@ -73,7 +74,9 @@ export const Login = ({ onLogin }) => {
           </button>
         </label>
         {error && <p style={{ color: 'red' }}>{error}</p>} {/* Corrected typo here */}
+      </form>
       </div>
+
     </>
   );
 };
