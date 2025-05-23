@@ -10,3 +10,4 @@ Werkzeug>=2.0
 python-dotenv # For managing environment variables (recommended)
 gunicorn==22.0.0
 flask-jwt-extended
+resend

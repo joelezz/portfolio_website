@@ -1,6 +1,6 @@
 # main.py
 import os
-from flask import Flask, request, jsonify, url_for, send_from_directory # render_template, redirect, flash (if keeping server-side admin)
+from flask import Flask, request, jsonify, url_for, send_from_directory
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError, DataError
@@ -8,6 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
+import resend  # Add this import at the top
 
 # --- JWT IMPORT ---
 from flask_jwt_extended import create_access_token, jwt_required, JWTManager, get_jwt_identity
@@ -24,12 +25,12 @@ app = Flask(__name__)
 # Updated CORS configuration
 allowed_origins = os.environ.get(
     'ALLOWED_ORIGINS',
-    'http://localhost:5173,https://www.joelezzahid.com' # Default values
+    'http://localhost:5173,https://www.joelezzahid.com'
 ).split(',')
 
 CORS(
     app,
-    resources={r"/api/*": {"origins": allowed_origins}}, # Ensure your form routes start with /api/
+    resources={r"/api/*": {"origins": allowed_origins}},
     allow_headers=["Authorization", "Content-Type"],
     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     supports_credentials=True
@@ -37,7 +38,7 @@ CORS(
 
 # --- App Configuration ---
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'your_very_strong_and_unique_secret_key_here_CHANGE_ME')
-app.config['JWT_SECRET_KEY'] = app.config['SECRET_KEY'] # Can be the same or different
+app.config['JWT_SECRET_KEY'] = app.config['SECRET_KEY']
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 
 # PostgreSQL Config
@@ -103,13 +104,12 @@ class Project(db.Model):
             'date_added': self.date_added.isoformat() if self.date_added else None
         }
 
-# NEW: Contact Form Submission Model
 class ContactSubmission(db.Model):
     __tablename__ = 'contact_submissions'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), nullable=False)
-    phone = db.Column(db.String(50), nullable=True)  # Assuming phone is optional
+    phone = db.Column(db.String(50), nullable=True)
     message = db.Column(db.Text, nullable=False)
     submission_date = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
@@ -125,9 +125,8 @@ class ContactSubmission(db.Model):
             'message': self.message,
             'submission_date': self.submission_date.isoformat() if self.submission_date else None
         }
-# END NEW
 
-# --- Helper Functions for File Upload ---
+# --- Helper Functions ---
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -145,6 +144,40 @@ def save_image(file_storage):
             app.logger.error(f"Failed to save image {unique_filename}: {e}")
             return None
     return None
+
+def send_notification_email(submission):
+    """Send email notification using Resend"""
+    resend.api_key = os.environ.get('RESEND_API_KEY')
+    notification_email = os.environ.get('NOTIFICATION_EMAIL')
+    
+    if not resend.api_key or not notification_email:
+        app.logger.warning("Email notification skipped: Missing RESEND_API_KEY or NOTIFICATION_EMAIL")
+        return False
+    
+    try:
+        resend.Emails.send({
+            "from": "Portfolio <onboarding@resend.dev>",  # Change this after domain verification
+            "to": notification_email,
+            "subject": f"New Contact Form Submission from {submission.name}",
+            "html": f"""
+            <h2>New Contact Form Submission</h2>
+            <p><strong>Date:</strong> {submission.submission_date.strftime('%Y-%m-%d %H:%M:%S UTC')}</p>
+            <hr>
+            <p><strong>Name:</strong> {submission.name}</p>
+            <p><strong>Email:</strong> <a href="mailto:{submission.email}">{submission.email}</a></p>
+            <p><strong>Phone:</strong> {submission.phone or 'Not provided'}</p>
+            <hr>
+            <p><strong>Message:</strong></p>
+            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px;">
+                <pre style="white-space: pre-wrap; font-family: Arial, sans-serif;">{submission.message}</pre>
+            </div>
+            """
+        })
+        app.logger.info(f"Notification email sent successfully for submission from {submission.name}")
+        return True
+    except Exception as e:
+        app.logger.error(f"Failed to send email: {e}")
+        return False
 
 # --- API Endpoints ---
 
@@ -181,7 +214,6 @@ def admin_login_api():
 @app.route('/api/admin/projects', methods=['GET'])
 @jwt_required()
 def admin_get_all_projects_api():
-    # ... (your existing code) ...
     current_user_id = get_jwt_identity()
     app.logger.info(f"Admin user {current_user_id} fetching all projects.")
     try:
@@ -191,11 +223,9 @@ def admin_get_all_projects_api():
         app.logger.error(f"Error fetching projects for admin {current_user_id}: {e}", exc_info=True)
         return jsonify({"message": "Could not retrieve projects", "error_details": str(e)}), 500
 
-
 @app.route('/api/admin/projects', methods=['POST'])
 @jwt_required()
 def admin_create_project_api():
-    # ... (your existing detailed code with validation and error handling) ...
     current_user_id = get_jwt_identity()
     app.logger.info(f"Admin user {current_user_id} attempting to create a project.")
     app.logger.debug(f"Received Form Data for POST /api/admin/projects: {request.form}")
@@ -255,11 +285,9 @@ def admin_create_project_api():
         app.logger.error(f"Unexpected error creating project by admin {current_user_id}: {e}", exc_info=True)
         return jsonify({"message": "An unexpected error occurred.", "error_details": str(e)}), 500
 
-
 @app.route('/api/admin/projects/<int:project_id>', methods=['PUT'])
 @jwt_required()
 def admin_update_project_api(project_id):
-    # ... (your existing detailed code with validation and error handling) ...
     current_user_id = get_jwt_identity()
     project = db.session.get(Project, project_id)
     if not project:
@@ -329,7 +357,6 @@ def admin_update_project_api(project_id):
 @app.route('/api/admin/projects/<int:project_id>', methods=['DELETE'])
 @jwt_required()
 def admin_delete_project_api(project_id):
-    # ... (your existing code) ...
     current_user_id = get_jwt_identity()
     project = db.session.get(Project, project_id)
     if not project:
@@ -350,10 +377,9 @@ def admin_delete_project_api(project_id):
         app.logger.error(f"Error deleting project ID {project_id} by admin {current_user_id}: {e}", exc_info=True)
         return jsonify({"message": "Failed to delete project", "error_details": str(e)}), 500
 
-# --- PUBLIC API Endpoint (for your React portfolio frontend to display projects) ---
+# --- PUBLIC API Endpoint ---
 @app.route('/api/projects', methods=['GET'])
 def get_public_projects_api():
-    # ... (your existing code) ...
     app.logger.info("Public request to /api/projects")
     try:
         projects = Project.query.order_by(Project.date_added.desc()).all()
@@ -367,7 +393,7 @@ def get_public_projects_api():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-# --- NEW: Contact Form API Endpoints ---
+# --- Contact Form API Endpoints ---
 @app.route('/api/form_submit', methods=['POST'])
 def handle_form_submit():
     """
@@ -380,16 +406,15 @@ def handle_form_submit():
     data = request.get_json()
     name = data.get('name')
     email = data.get('email')
-    phone = data.get('phone') # Optional
+    phone = data.get('phone')  # Optional
     message = data.get('message')
 
     errors = {}
     if not name: errors['name'] = "Name is required."
     if not email: errors['email'] = "Email is required."
     if not message: errors['message'] = "Message is required."
-    # Basic email format check (can be more sophisticated)
+    # Basic email format check
     if email and '@' not in email: errors['email_format'] = "Invalid email format."
-
 
     if errors:
         return jsonify({"message": "Validation errors", "errors": errors}), 422
@@ -404,7 +429,21 @@ def handle_form_submit():
         db.session.add(new_submission)
         db.session.commit()
         app.logger.info(f"New contact form submission from {name} ({email}).")
-        return jsonify({"message": "Form submitted successfully!", "submission": new_submission.to_dict()}), 201
+        
+        # Send email notification (non-blocking)
+        email_sent = send_notification_email(new_submission)
+        
+        response_data = {
+            "message": "Form submitted successfully!",
+            "submission": new_submission.to_dict()
+        }
+        
+        # Optionally include email status in debug mode
+        if app.debug:
+            response_data["email_notification_sent"] = email_sent
+            
+        return jsonify(response_data), 201
+        
     except IntegrityError as e:
         db.session.rollback()
         app.logger.error(f"Database integrity error on form submission: {e}", exc_info=True)
@@ -420,7 +459,6 @@ def handle_form_data_ping():
     Handles the POST request made by the frontend's useEffect on mount.
     Expects JSON: {"form_name": "...", "form_email": "...", "form_phone": "...", "form_message": "..."}
     Currently, this endpoint just logs the data and acknowledges.
-    It does NOT save to the ContactSubmission table due to differing field names and unclear purpose.
     """
     if not request.is_json:
         return jsonify({"message": "Request must be JSON"}), 400
@@ -428,16 +466,69 @@ def handle_form_data_ping():
     data = request.get_json()
     app.logger.info(f"Received initial form data ping: {data}")
 
-    # You could choose to save this to a different table or process it differently if needed.
-    # For now, just acknowledging.
     return jsonify({"message": "Initial form data received."}), 200
-# --- END NEW ---
 
+# --- Admin Contact Submission Endpoints ---
+@app.route('/api/admin/contact-submissions', methods=['GET'])
+@jwt_required()
+def admin_get_contact_submissions():
+    current_user_id = get_jwt_identity()
+    app.logger.info(f"Admin user {current_user_id} fetching contact submissions.")
+    
+    try:
+        # Get query parameters for pagination
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 20, type=int)
+        
+        # Query with pagination
+        submissions = ContactSubmission.query.order_by(
+            ContactSubmission.submission_date.desc()
+        ).paginate(page=page, per_page=per_page, error_out=False)
+        
+        return jsonify({
+            'submissions': [s.to_dict() for s in submissions.items],
+            'total': submissions.total,
+            'pages': submissions.pages,
+            'current_page': page
+        }), 200
+        
+    except Exception as e:
+        app.logger.error(f"Error fetching contact submissions: {e}", exc_info=True)
+        return jsonify({"message": "Could not retrieve submissions", "error_details": str(e)}), 500
 
-# --- Database Initialization and Default Admin User ---
+@app.route('/api/admin/contact-submissions/<int:submission_id>', methods=['GET'])
+@jwt_required()
+def admin_get_contact_submission(submission_id):
+    current_user_id = get_jwt_identity()
+    submission = db.session.get(ContactSubmission, submission_id)
+    
+    if not submission:
+        return jsonify({"message": "Submission not found"}), 404
+        
+    return jsonify(submission.to_dict()), 200
+
+@app.route('/api/admin/contact-submissions/<int:submission_id>', methods=['DELETE'])
+@jwt_required()
+def admin_delete_contact_submission(submission_id):
+    current_user_id = get_jwt_identity()
+    submission = db.session.get(ContactSubmission, submission_id)
+    
+    if not submission:
+        return jsonify({"message": "Submission not found"}), 404
+        
+    try:
+        db.session.delete(submission)
+        db.session.commit()
+        app.logger.info(f"Contact submission ID {submission_id} deleted by admin {current_user_id}.")
+        return jsonify({"message": "Submission deleted successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error deleting submission ID {submission_id}: {e}", exc_info=True)
+        return jsonify({"message": "Failed to delete submission", "error_details": str(e)}), 500
+
+# --- Database Initialization ---
 with app.app_context():
     db.create_all()
-    # UPDATED print statement
     print("Database tables checked/created (AdminUser, Project, ContactSubmission).")
     
     admin_username = os.environ.get('DEFAULT_ADMIN_USERNAME', 'admin')
@@ -453,7 +544,6 @@ with app.app_context():
         admin_to_reset.set_password(os.environ.get('RESET_ADMIN_PASSWORD'))
         db.session.commit()
         print(f"Admin user '{admin_username}' password has been reset.")
-
 
 if __name__ == '__main__':
     is_debug_mode = os.environ.get('FLASK_DEBUG', '0').lower() in ['true', '1', 't']

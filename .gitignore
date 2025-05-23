@@ -26,12 +26,6 @@ __pycache__/
 # Database files (if using local SQLite for dev, not for production data)
 # *.db
 
-# Uploaded files (user-generated content, should not be in repo)
-# If your Flask UPLOAD_FOLDER is 'backend/static/uploads/'
-backend/static/uploads/
-# Or more generally, if it's just 'static/uploads' relative to backend root
-# static/uploads/
-
 # IDE / Editor specific
 .idea/
 .vscode/
