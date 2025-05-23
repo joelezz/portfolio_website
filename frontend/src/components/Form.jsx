@@ -1,26 +1,28 @@
 import React, { useState, useEffect } from "react";
 
 const FormComponent = () => {
-  const initialFormState = { // Define initial state for easy reset
+  const initialFormState = {
     name: "",
     email: "",
     phone: "",
     message: "",
   };
+  
   const [data, setData] = useState(initialFormState);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null); // 'success', 'error', or null
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // Your useEffect (see note below)
+  // Note: Consider if this useEffect is needed - it sends empty data on mount
   useEffect(() => {
-    // ... (your existing fetch logic, but consider if it should run on mount with empty data)
-    // This POST request on mount with empty initial data is unusual.
-    // Is it meant to register a view, or perhaps fetch initial data instead?
-    // For now, let's assume it's intentional for your backend.
-    fetch("https://portfolio-website-backend-749y.onrender.com/form_data", {
+    // This appears to be a ping to the backend on component mount
+    // If not needed, you can remove this entire useEffect
+    fetch("https://portfolio-website-backend-749y.onrender.com/api/form_data", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ // This will send empty strings initially
+      body: JSON.stringify({
         form_name: data.name,
         form_email: data.email,
         form_phone: data.phone,
@@ -29,49 +31,90 @@ const FormComponent = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("Fetched data on mount:", data);
+        console.log("Initial ping response:", data);
       })
       .catch((err) => {
-        console.error("Error fetching on mount:", err);
+        console.error("Error on initial ping:", err);
       });
-  }, []); // Empty dependency array means this runs once on mount
+  }, []);
 
   const handleChange = (e) => {
     setData({
       ...data,
       [e.target.name]: e.target.value,
     });
+    // Clear any previous status when user starts typing again
+    if (submitStatus) {
+      setSubmitStatus(null);
+      setErrorMessage("");
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form submitted:", data);
+  const validateForm = () => {
+    const errors = [];
+    
+    if (!data.name.trim()) errors.push("Name is required");
+    if (!data.email.trim()) errors.push("Email is required");
+    if (!data.email.includes('@')) errors.push("Please enter a valid email");
+    if (!data.message.trim()) errors.push("Message is required");
+    
+    return errors;
+  };
 
-    fetch("https://portfolio-website-backend-749y.onrender.com/form_submit", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    })
-      .then((res) => {
-        // Check if the response is ok before trying to parse as JSON
-        if (!res.ok) {
-          // If server sends non-JSON error or empty response for errors
-          return res.text().then(text => { throw new Error(text || `Server responded with ${res.status}`) });
-        }
-        return res.json();
-      })
-      .then((response) => {
-        console.log("Server response:", response);
-        // Clear the form by resetting the state
-        setData(initialFormState); // <--- THE REACT WAY TO CLEAR THE FORM
-      })
-      .catch((error) => {
-        console.error("Error submitting form:", error);
-        // Optionally, you might want to inform the user about the error
-        // and not clear the form so they can try again.
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Client-side validation
+    const errors = validateForm();
+    if (errors.length > 0) {
+      setSubmitStatus('error');
+      setErrorMessage(errors.join('. '));
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+    setErrorMessage("");
+
+    try {
+      const response = await fetch("https://portfolio-website-backend-749y.onrender.com/api/form_submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
       });
+
+      const responseData = await response.json();
+
+      if (response.ok) {
+        console.log("Form submitted successfully:", responseData);
+        setSubmitStatus('success');
+        setData(initialFormState); // Clear the form
+        
+        // Clear success message after 5 seconds
+        setTimeout(() => {
+          setSubmitStatus(null);
+        }, 5000);
+      } else {
+        console.error("Server validation errors:", responseData);
+        setSubmitStatus('error');
+        
+        // Handle server validation errors
+        if (responseData.errors) {
+          const errorMessages = Object.values(responseData.errors).join('. ');
+          setErrorMessage(errorMessages);
+        } else {
+          setErrorMessage(responseData.message || "Failed to submit form. Please try again.");
+        }
+      }
+    } catch (error) {
+      console.error("Network error submitting form:", error);
+      setSubmitStatus('error');
+      setErrorMessage("Network error. Please check your connection and try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -84,6 +127,8 @@ const FormComponent = () => {
             placeholder="Name"
             value={data.name}
             onChange={handleChange}
+            disabled={isSubmitting}
+            required
           />
         </label>
         <label>
@@ -93,15 +138,18 @@ const FormComponent = () => {
             placeholder="Email"
             value={data.email}
             onChange={handleChange}
+            disabled={isSubmitting}
+            required
           />
         </label>
         <label>
           <input
-            type="text"
+            type="tel"
             name="phone"
-            placeholder="Phone"
+            placeholder="Phone (optional)"
             value={data.phone}
             onChange={handleChange}
+            disabled={isSubmitting}
           />
         </label>
         <label>
@@ -111,10 +159,48 @@ const FormComponent = () => {
             placeholder="Your message"
             value={data.message}
             onChange={handleChange}
+            disabled={isSubmitting}
+            required
+            rows="5"
           ></textarea>
         </label>
+        
+        {/* Status Messages */}
+        {submitStatus === 'success' && (
+          <div className="status-message success-message" style={{
+            color: '#28a745',
+            backgroundColor: '#d4edda',
+            padding: '10px',
+            borderRadius: '4px',
+            marginBottom: '10px'
+          }}>
+            ✓ Thank you! Your message has been sent successfully.
+          </div>
+        )}
+        
+        {submitStatus === 'error' && (
+          <div className="status-message error-message" style={{
+            color: '#dc3545',
+            backgroundColor: '#f8d7da',
+            padding: '10px',
+            borderRadius: '4px',
+            marginBottom: '10px'
+          }}>
+            ✗ {errorMessage}
+          </div>
+        )}
+        
         <div>
-          <input className="submit-btn" type="submit" value="Send" />
+          <input 
+            className="submit-btn" 
+            type="submit" 
+            value={isSubmitting ? "Sending..." : "Send"}
+            disabled={isSubmitting}
+            style={{
+              opacity: isSubmitting ? 0.7 : 1,
+              cursor: isSubmitting ? 'not-allowed' : 'pointer'
+            }}
+          />
         </div>
       </form>
     </div>

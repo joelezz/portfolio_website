@@ -361,7 +361,7 @@ input, textarea {
 }
 
     .submit-btn{
-      width: 5em;
+      width: 3em;
       height: 2em;
       font-size: x-large;
       font-weight: bolder;
@@ -579,6 +579,7 @@ text-decoration: none;
   .login-form {
     border: 1px dotted rgb(255, 255, 255);
     background-color: rgba(38, 38, 38, 0.382);
+    margin: 0em 0em;
     box-sizing: border-box;
   }
   
@@ -625,7 +626,7 @@ form {
 }
 
 input .submit-btn{
-      width: 5em;
+      width: 100%;
       height: 2em;
       font-size: x-large;
       font-weight: bolder;
@@ -633,13 +634,12 @@ input .submit-btn{
       color: rgb(255, 255, 255);
       background-color: transparent;
       border: none;
-
     }
 
 .login-form{
   border: 1px dotted rgb(255, 255, 255);
   background-color: rgba(38, 38, 38, 0.382);
-
+  margin: 0em 0em;
 }
 .login-form input{
   width: 100%;
