@@ -51,7 +51,7 @@ h1:hover {
 
 h3{
   color:rgb(255, 255, 255);
-  font-size: 10em;
+  font-size: 6em;
   margin: 10px 5%;
 }
 
@@ -318,7 +318,7 @@ input, textarea {
   flex-direction: column;
   border: 1px dotted rgb(255, 255, 255);
   background-color: rgba(38, 38, 38, 0.382);
-  margin: auto;
+  margin: 10em 20em;
   padding: 5em;
   box-sizing: border-box;
 }
@@ -347,7 +347,7 @@ label {
 /* Base input styles - apply to all inputs */
 input, textarea {
   width: 100%;
-  border: none;
+  border: 1px dotted;
   margin: 0.5em;
   box-sizing: border-box; /* This is crucial for proper width calculation */
 }
@@ -535,6 +535,13 @@ text-decoration: none;
   .container {
     margin: 0 10%;
   }
+
+  h3{
+  color:rgb(255, 255, 255);
+  font-size: 1.5em;
+  margin: 10px 5%;
+}
+
   
   .main-content-area {
     width: 100%;  
@@ -572,8 +579,6 @@ text-decoration: none;
   .login-form {
     border: 1px dotted rgb(255, 255, 255);
     background-color: rgba(38, 38, 38, 0.382);
-    margin: 2em 0; /* Remove side margins */
-    padding: 2em 1em; /* Reduce side padding */
     box-sizing: border-box;
   }
   

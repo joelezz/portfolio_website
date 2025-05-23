@@ -44,10 +44,10 @@ export const Login = ({ onLogin }) => {
   return (
 
   <>
-      <h1>Login</h1>
+      <h1>Login area</h1>
       <div className="login-form">
+        <p>Provide your credentials, please.</p>
         <label>
-
           <input
             className="username"
             type="text"
