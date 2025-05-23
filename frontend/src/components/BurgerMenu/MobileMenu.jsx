@@ -22,7 +22,7 @@ const MobileMenu = ({ isOpen, closeMenu }) => {
       <NavLink to="/work" onClick={handleLinkClick} className={({isActive}) => isActive ? "active-link" : ""}>Work</NavLink>
       <NavLink to="/contact" onClick={handleLinkClick} className={({isActive}) => isActive ? "active-link" : ""}>Contact</NavLink>
       
-      {isAuthenticated ? (
+      {/*isAuthenticated ? (
         <>
           {user && user.username && <span className="user-greeting">Hi, {user.username}</span>}
           <NavLink to="/dashboard" onClick={handleLinkClick} className={({isActive}) => isActive ? "active-link" : ""}>Dashboard</NavLink>
@@ -30,7 +30,7 @@ const MobileMenu = ({ isOpen, closeMenu }) => {
         </>
       ) : (
         <NavLink to="/dashboard" onClick={handleLinkClick} className={({isActive}) => isActive ? "active-link" : ""}>Login</NavLink>
-      )}
+      )*/}
     </nav>
   );
 };

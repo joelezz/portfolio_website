@@ -77,7 +77,7 @@ const FormComponent = () => {
     setErrorMessage("");
 
     try {
-      const response = await fetch("https://portfolio-website-backend-749y.onrender.com/api/form_submit", {
+      const response = await fetch("https://portfolio-website-backend-749y.onrender.com/api/form_submit" , {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
