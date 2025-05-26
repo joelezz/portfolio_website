@@ -16,7 +16,6 @@ const Work = () => {
     // However, if the delete button is added later, `token` will be needed for that.
     const { token, isAuthenticated } = useAuth(); // Get token and isAuthenticated status
 
-    console.log('Work.jsx - isAuthenticated:', isAuthenticated, 'Token:', token); // <-- ADD THIS DEBUG LINE
 
     useEffect(() => {
         const fetchProjectsData = async () => {
@@ -54,7 +53,6 @@ const Work = () => {
     // Remember the handleDeleteProject function will need the token if this is an admin page:
     const handleDeleteProject = async (projectId) => {
         
-        console.log("Attempting to delete. isAuthenticated:", isAuthenticated, "Token being used:", token);
 
         if (!isAuthenticated || !token) { // Check authentication before delete
             alert("You must be logged in to delete projects.");

@@ -43,7 +43,6 @@ const Dashboard = () => {
     setIsSubmitting(true);
 
 const authToken = localStorage.getItem('authToken');
-    console.log('Auth Token being sent:', authToken); // <-- ADD THIS
     if (!authToken || authToken === "[object Object]") { // Add a check for common mistake
         setFormError('Authentication token is invalid or missing. Please log in again.');
         setIsSubmitting(false);
