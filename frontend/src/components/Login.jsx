@@ -63,6 +63,8 @@ export const Login = ({ onLogin }) => {
             className="password"
             type="password"
             placeholder="password"
+            name="password" 
+            autocomplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={isLoading}
